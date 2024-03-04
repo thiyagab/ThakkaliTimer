@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "codesapiens.thakkalitimer",
+    "sha256_cert_fingerprints":
+    ["2F:58:55:7E:B9:68:BC:F5:C2:F0:2F:A1:4E:22:F3:48:A7:C0:DC:19:10:A2:CC:8E:C7:E0:18:C0:67:B0:A4:FC",
+    "49:9B:49:79:7C:12:82:54:B6:B5:1D:5F:3A:82:4A:80:6B:E5:5F:EB:59:8A:F3:75:14:87:10:81:9D:51:33:42"]
+  }
+}]
