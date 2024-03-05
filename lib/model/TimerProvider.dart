@@ -15,22 +15,19 @@ class TimerProvider extends ChangeNotifier {
         await DBHelper.fetchAllSessionsForTimer(_timerModel.timerReference!);
     _timerModel.sessions.clear();
     _timerModel.sessions.addAll(value.docs);
-    _timerModel.totalCompletedSessions=completedSessionsForUser();
+    _timerModel.totalCompletedSessions = completedSessionsForUser();
     if (notify) notifyListeners();
     return value.docs;
   }
 
-
-
-
-
   completedSessionsForUser() {
-    int count=0;
+    int count = 0;
     //iterate using for each _timermodel.sessions and find the session belong to current userid, and return the count
-    for(var session in _timerModel.sessions){
-      Map<String,dynamic> data=session.data() as Map<String,dynamic>;
-      if(data['userid'] == FirebaseAuth.instance.currentUser!.uid && data['status']==0) {
-        count=count+1;
+    for (var session in _timerModel.sessions) {
+      Map<String, dynamic> data = session.data() as Map<String, dynamic>;
+      if (data['userid'] == FirebaseAuth.instance.currentUser!.uid &&
+          data['status'] == 0) {
+        count = count + 1;
       }
     }
     return count;
@@ -50,17 +47,31 @@ class TimerProvider extends ChangeNotifier {
     }
   }
 
+  fetchInvitedTimers({bool notify = true}) async {
+    List<DocumentSnapshot>? invitedTimers =
+        await DBHelper.fetchAllTimersFromSessions();
+    if (invitedTimers != null) {
+      _timerModel.invitedTimers.clear();
+      _timerModel.invitedTimers.addAll(invitedTimers);
+      if (notify) notifyListeners();
+    }
+  }
+
   void initializeTimer(DocumentSnapshot value) {
     _timerModel.timerReference = value.reference;
     _timerModel.isOwnTimer = true;
     if (value.data() != null) {
-      setTimerReference(value.reference, (value.data() as Map<String, dynamic>)['name'], (value.data() as Map<String, dynamic>)['owner']);
+      setTimerReference(
+          value.reference,
+          (value.data() as Map<String, dynamic>)['name'],
+          (value.data() as Map<String, dynamic>)['owner']);
     }
   }
 
   Future<DocumentSnapshot?> fetchInvitedTimerById(String timerId,
       {bool notify = true}) async {
     DocumentSnapshot? value = await DBHelper.fetchTimer(timerId);
+    print(value);
     if (value != null) {
       _timerModel.timerReference = value?.reference;
       if (value?.data() != null) {
@@ -69,12 +80,10 @@ class TimerProvider extends ChangeNotifier {
         _timerModel.ownerName =
             (value?.data() as Map<String, dynamic>)['owner'];
         if (!_timerModel.invitedTimers
-            .map((e) => e.id)
-            .toSet()
-            .contains(value.id)
-            && !timerModel.timers .map((e) => e.id)
-            .toSet()
-            .contains(value.id)) {
+                .map((e) => e.id)
+                .toSet()
+                .contains(value.id) &&
+            !timerModel.timers.map((e) => e.id).toSet().contains(value.id)) {
           timerModel.invitedTimers.add(value!);
         }
       }
@@ -85,11 +94,17 @@ class TimerProvider extends ChangeNotifier {
 
   checkAndFetchTimers(String? timerId) async {
     try {
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (_timerModel.timers == null || _timerModel.timers.isEmpty) {
+          await fetchTimers(notify: false, setDefault: timerId == null);
+        }
 
-      if (FirebaseAuth.instance.currentUser != null &&
-          (_timerModel.timers == null || _timerModel.timers.isEmpty)) {
-        await fetchTimers(notify: false, setDefault: timerId == null);
+        if (_timerModel.invitedTimers == null ||
+            _timerModel.invitedTimers.isEmpty) {
+          await fetchInvitedTimers(notify: false);
+        }
       }
+
       if (timerId != null) {
         DocumentSnapshot? invitedTimer =
             await fetchInvitedTimerById(timerId, notify: false);
@@ -106,23 +121,27 @@ class TimerProvider extends ChangeNotifier {
     _timerModel.timerReference = newTimerReference;
     _timerModel.timerName = timerName;
     _timerModel.ownerName = ownerName;
-    _timerModel.selectedScreen=1;
+    _timerModel.selectedScreen = 1;
     await fetchAllSessions(notify: false);
     notifyListeners(); // Notify consumers of state change
   }
 
-  void clearTimerReference() {
+  void clearTimerReference({bool notify = true}) {
     _timerModel.timerReference = null;
     _timerModel.timerName = null;
     _timerModel.ownerName = null;
-    _timerModel.totalCompletedSessions=0;
-    notifyListeners();
+    _timerModel.totalCompletedSessions = 0;
+    _timerModel.selectedScreen = 1;
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   deleteTimer() async {
     if (_timerModel.timerReference != null) {
       await DBHelper.deleteAllSessionsForTimerForCurrentUser(
           timerReference: timerModel.timerReference);
+      clearTimerReference(notify: false);
       if (_timerModel.isOwnTimer) {
         QuerySnapshot value = await DBHelper.fetchAllSessionsForTimer(
             _timerModel.timerReference!);
@@ -132,9 +151,10 @@ class TimerProvider extends ChangeNotifier {
           await DBHelper.deactivateTimer(
               reference: _timerModel.timerReference!);
         }
+        fetchTimers();
+      } else {
+        fetchInvitedTimers();
       }
-      clearTimerReference();
-      fetchTimers();
     }
   }
 
@@ -161,14 +181,13 @@ class TimerProvider extends ChangeNotifier {
     }
   }
 
-  clearAll(){
+  clearAll() {
     _timerModel.timers.clear();
     _timerModel.invitedTimers.clear();
     _timerModel.sessions.clear();
-    _timerModel.remainingTime=_timerModel.totalTime;
-    _timerModel.isTimerRunning=false;
-
+    _timerModel.remainingTime = _timerModel.totalTime;
+    _timerModel.isTimerRunning = false;
+    _timerModel.isOwnTimer=true;
     clearTimerReference();
-    // notifyListeners();
   }
 }

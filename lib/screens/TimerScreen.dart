@@ -364,7 +364,7 @@ class _TimerScreenState extends State<TimerScreen> {
                             Navigator.pushReplacementNamed(context, '/',
                                 arguments: [state.user?.uid]);
                             Provider.of<TimerProvider>(context, listen: false)
-                                .fetchTimers();
+                                .checkAndFetchTimers(null);
                           }),
                         ]));
               } else {
@@ -383,7 +383,7 @@ class _TimerScreenState extends State<TimerScreen> {
               }
             },
             child: Text(
-              '${FirebaseAuth.instance.currentUser != null ? '' : 'Login to '} Invite',
+              '${FirebaseAuth.instance.currentUser != null ? '' : 'Login to '}Invite',
               textAlign: TextAlign.center, // Ensures text remains centered
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             )));

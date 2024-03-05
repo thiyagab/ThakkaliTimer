@@ -15,7 +15,7 @@ class DBHelper {
           'name': name,
           'userid': FirebaseAuth.instance.currentUser?.uid,
           'owner': FirebaseAuth.instance.currentUser?.displayName,
-          'isActive':true
+          'isActive': true
         });
       }
     } catch (error) {
@@ -35,8 +35,9 @@ class DBHelper {
     }
   }
 
-  static Future<void>? deleteAllSessionsForTimerForCurrentUser({required DocumentReference? timerReference}){
-    if(FirebaseAuth.instance.currentUser != null) {
+  static Future<void>? deleteAllSessionsForTimerForCurrentUser(
+      {required DocumentReference? timerReference}) {
+    if (FirebaseAuth.instance.currentUser != null) {
       return _sessionsCollection
           .where('timer', isEqualTo: timerReference)
           .where('userid', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
@@ -74,11 +75,13 @@ class DBHelper {
   }
 
   //Fetch all feeds for the given timer reference
-  static Stream<QuerySnapshot>?  fetchAllFeedsForTimer (
-      DocumentReference? timerReference)  {
+  static Stream<QuerySnapshot>? fetchAllFeedsForTimer(
+      DocumentReference? timerReference) {
     if (timerReference != null) {
-      Stream<QuerySnapshot> value =
-           _feedCollection.where('timer', isEqualTo: timerReference).orderBy('timestamp', descending: true).snapshots();
+      Stream<QuerySnapshot> value = _feedCollection
+          .where('timer', isEqualTo: timerReference)
+          .orderBy('timestamp', descending: true)
+          .snapshots();
       return value;
       //get the list of docs from the value and return a list of maps
       // return value.docs.map((e) => e.data() as Map<String, dynamic>).toList();
@@ -107,9 +110,14 @@ class DBHelper {
           .toSet();
       QuerySnapshot value1 = await _timersCollection
           .where(FieldPath.documentId, whereIn: documentIds)
-          .where('userid', isNotEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          // .where('userid', isNotEqualTo: FirebaseAuth.instance.currentUser?.uid)
           .get();
-      value1.docs.map((e) => timers.add(e));
+
+      timers.addAll(value1.docs.where((element) {
+        return (element.data() as Map)['userid'] != FirebaseAuth.instance.currentUser?.uid;
+
+      }));
+      print('value1 length ${value1.docs.length}'+' timers length ${timers.length}');
       return timers;
     }
   }
@@ -137,7 +145,9 @@ class DBHelper {
 
   static Stream<QuerySnapshot<Object?>>? streamAllSessionsForTimer(
       DocumentReference timerReference) {
-    return _sessionsCollection.where('timer', isEqualTo: timerReference).snapshots();
+    return _sessionsCollection
+        .where('timer', isEqualTo: timerReference)
+        .snapshots();
   }
 
   static Future<void> updateTimer(

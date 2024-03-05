@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>709377163335-1d1kl2t7gv31hj1failsqkorumbkuhkr.apps.googleusercontent.com</string>
+	<string>1092210025716-hp4esmpc1l01hovi63urlcoq273jo32c.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.709377163335-1d1kl2t7gv31hj1failsqkorumbkuhkr</string>
+	<string>com.googleusercontent.apps.1092210025716-hp4esmpc1l01hovi63urlcoq273jo32c</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>709377163335-4711to841b4p18ftk6eaq73v0dq1imqd.apps.googleusercontent.com</string>
+	<string>1092210025716-1sk3sfpef7eugtmnr6enqs5a031dsgn8.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDE-udpRsV-6CJBqemG0rm1CXCPNSuzR0k</string>
+	<string>AIzaSyAOHDSdiBBHKlxfPCtAYedGLWYfwd3ApmQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>709377163335</string>
+	<string>1092210025716</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.bt.together</string>
+	<string>codesapiens.thakkalitimer</string>
 	<key>PROJECT_ID</key>
-	<string>together-all</string>
+	<string>thakkalitimer</string>
 	<key>STORAGE_BUCKET</key>
-	<string>together-all.appspot.com</string>
+	<string>thakkalitimer.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:709377163335:ios:8f0abd2e460df1a7873162</string>
+	<string>1:1092210025716:ios:c61f77b5739fc43e072aa1</string>
 </dict>
 </plist>

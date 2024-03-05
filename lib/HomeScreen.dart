@@ -7,6 +7,7 @@ import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:provider/provider.dart';
 import 'package:thakkalitimer/screens/FeedUI.dart';
 import 'package:thakkalitimer/screens/FriendsScreen.dart';
+import 'package:thakkalitimer/screens/SideMenu.dart';
 import 'package:thakkalitimer/screens/TimerScreen.dart';
 import 'model/TimerProvider.dart';
 
@@ -24,37 +25,23 @@ class _HomeScreenState extends State<HomeScreen>
   String appBarTitle = 'Thakkali Timer';
 
   @override
-  void initState() {
-    super.initState();
-
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Provider.of<TimerProvider>(context, listen: false).checkAndFetchTimers();
-  }
-
-  @override
   void dispose() {
-    _tabController?.dispose(); // Di
+    _tabController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return
       Consumer<TimerProvider>(builder: (context, timerProvider, child) {
         _tabController = PersistentTabController(initialIndex: timerProvider.timerModel.selectedScreen);
       return LayoutBuilder(
         builder: (context, constraints) {
       if (constraints.maxWidth >= 600) {
-        // Adjust the breakpoint as needed
         // Desktop Layout: Split View
         return Scaffold(
           body: Row(children: [
-            Expanded(flex: 2, child: buildSideMenu(context)),
+            const Expanded(flex: 2, child: SideMenu()),
             // Main content area
             Expanded(flex: 8, child: buildPersistentNavigation()),
           ]),
@@ -62,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen>
       } else {
         return Scaffold(
           // Use drawer for mobile and for desktop browsers with a larger width use SplitView instead of Drawer
-          drawer: buildSideMenu(context),
+          drawer: SideMenu(),
           appBar: AppBar(
             title: Text(appBarTitle),
             leading: Builder(
@@ -149,146 +136,5 @@ class _HomeScreenState extends State<HomeScreen>
           break;
       }
     });
-  }
-
-  Widget buildSideMenu(BuildContext context) {
-    return Consumer<TimerProvider>(
-        builder: (context, timerProvider, child) => Drawer(
-              child: ListView(
-                padding: const EdgeInsets.all(5),
-                children: [
-                  DrawerHeader(
-                    // Consider a header
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                    ),
-                    child: buildGreetUser(),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(
-                        left: 16.0, top: 16.0), // Section Spacing
-                    child: Text('Thakkalis',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  ListTile(
-                      title: const Text('Create New Timer'),
-                      onTap: () {
-                        Provider.of<TimerProvider>(context, listen: false)
-                            .clearTimerReference();
-                       checkAndCloseDrawer();
-                      }),
-                  ...buildTimersMenu(timerProvider),
-                  const Padding(
-                    padding: EdgeInsets.only(
-                        left: 16.0, top: 16.0), // Section Spacing
-                    child: Text('Invited Thakkalis',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  ...buildInvitedTimersMenu(timerProvider),
-                  const SizedBox(height: 10),
-                  ListTile(
-                    title: const Text('Statistics'),
-                    onTap: () {
-                      // ... Navigate to settings
-                      checkAndCloseDrawer();
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Settings'),
-                    onTap: () {
-                      // ... Navigate to settings
-                      checkAndCloseDrawer();
-                    },
-                  ),
-                  buildLogout(context),
-                ],
-              ),
-            ));
-  }
-
-  checkAndCloseDrawer(){
-    if(MediaQuery.of(context).size.width < 600){
-      Navigator.pop(context);
-    }
-  }
-
-  Widget buildLogout(BuildContext context) {
-    if(FirebaseAuth.instance.currentUser == null){
-      return const SizedBox.shrink();
-    }
-    return ListTile(
-      title: const Text('Logout'),
-      onTap: () {
-        FirebaseAuth.instance.signOut();
-        Provider.of<TimerProvider>(context, listen: false).clearTimerReference();
-        checkAndCloseDrawer();
-      },
-    );
-  }
-
-  Widget buildGreetUser() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: Container()), // Push text towards bottom
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            'Welcome ${FirebaseAuth.instance is FirebaseAuth && FirebaseAuth.instance.currentUser != null ? FirebaseAuth.instance.currentUser!.displayName : 'User'},',
-            style: const TextStyle(fontSize: 16, color: Colors.white),
-          ),
-        )
-      ],
-    );
-  }
-
-  List<ListTile> buildTimersMenu(final TimerProvider timerProvider) {
-    final timerModel = timerProvider.timerModel;
-    if (timerModel != null &&
-        timerModel.timers != null &&
-        timerModel.timers.isNotEmpty) {
-      final List<ListTile> tiles = [];
-      for (int index = 0; index < timerModel.timers.length; index++) {
-        tiles.add(buildMenuTile(timerModel.timers[index], timerProvider));
-      }
-      return tiles;
-    } else {
-      return [];
-    }
-  }
-
-  List<ListTile> buildInvitedTimersMenu(final TimerProvider timerProvider) {
-    final timerModel = timerProvider.timerModel;
-    if (timerModel != null &&
-        timerModel.invitedTimers != null &&
-        timerModel.invitedTimers.isNotEmpty) {
-      final List<ListTile> tiles = [];
-      for (int index = 0; index < timerModel.invitedTimers.length; index++) {
-        tiles.add(buildMenuTile(timerModel.invitedTimers[index], timerProvider));
-      }
-      return tiles;
-    } else {
-      return [const ListTile(title: Text('No Invited Timers'))];
-    }
-  }
-
-  buildMenuTile(DocumentSnapshot value, final TimerProvider timerProvider,){
-    final timerData =
-    value.data() as Map<String, dynamic>;
-     return  ListTile(
-        title: Text(timerData['name'] ?? 'Untitled Timer'),
-        onTap: () {
-          //TODO show some loading, as we fetch all sessions again here, should figure out a way to cache this
-          timerProvider.setTimerReference(
-              value.reference,
-              timerData['name'],
-              timerData['owner']);
-          //Check if its desktop browser with larger width, if not pop the drawer
-          if (MediaQuery.of(context).size.width < 600) {
-            Navigator.pop(context);
-          }
-        },
-      );
-
   }
 }

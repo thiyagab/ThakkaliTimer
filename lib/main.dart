@@ -53,9 +53,11 @@ class MyApp extends StatelessWidget {
         print('Url from settings:'+ settings.name!+' '+settings.arguments.toString());
         if(settings.name!.contains('timer=')){
           String? timerId=settings.name!.split('=')[1];
+          print('timer id $timerId');
           return buildHomeScreen(timerId);
         }else if(settings.name == '/'){
           String? timerId=Uri.base.queryParameters['timer'];
+          print('timer id $timerId');
           return buildHomeScreen(timerId);
         }
       },
