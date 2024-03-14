@@ -4,16 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thakkalitimer/model/TimerProvider.dart';
 
-class SideMenu extends StatefulWidget{
+class SideMenu extends StatefulWidget {
   const SideMenu({super.key});
-
 
   @override
   _SideMenuState createState() => _SideMenuState();
 }
 
-class _SideMenuState extends State<SideMenu>{
-
+class _SideMenuState extends State<SideMenu> {
   @override
   Widget build(BuildContext context) {
     return buildSideMenu(context);
@@ -22,71 +20,71 @@ class _SideMenuState extends State<SideMenu>{
   Widget buildSideMenu(BuildContext context) {
     return Consumer<TimerProvider>(
         builder: (context, timerProvider, child) => Drawer(
-          child: ListView(
-            padding: const EdgeInsets.all(5),
-            children: [
-              DrawerHeader(
-                // Consider a header
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: buildGreetUser(),
+              child: ListView(
+                padding: const EdgeInsets.all(5),
+                children: [
+                  DrawerHeader(
+                    // Consider a header
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                    child: buildGreetUser(),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(
+                        left: 16.0, top: 16.0), // Section Spacing
+                    child: Text('Thakkalis',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  ListTile(
+                      title: const Text('Create New Timer'),
+                      onTap: () {
+                        Provider.of<TimerProvider>(context, listen: false)
+                            .clearTimerReference();
+                        checkAndCloseDrawer();
+                      }),
+                  ...buildTimersMenu(timerProvider),
+                  const Padding(
+                    padding: EdgeInsets.only(
+                        left: 16.0, top: 16.0), // Section Spacing
+                    child: Text('Invited Thakkalis',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  ...buildInvitedTimersMenu(timerProvider),
+                  const SizedBox(height: 10),
+                  ListTile(
+                    title: const Text('Statistics'),
+                    onTap: () {
+                      // ... Navigate to settings
+                      checkAndCloseDrawer();
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Settings'),
+                    onTap: () {
+                      // ... Navigate to settings
+                      checkAndCloseDrawer();
+                    },
+                  ),
+                  buildLogout(context),
+                ],
               ),
-              const Padding(
-                padding: EdgeInsets.only(
-                    left: 16.0, top: 16.0), // Section Spacing
-                child: Text('Thakkalis',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              ListTile(
-                  title: const Text('Create New Timer'),
-                  onTap: () {
-                    Provider.of<TimerProvider>(context, listen: false)
-                        .clearTimerReference();
-                    checkAndCloseDrawer();
-                  }),
-              ...buildTimersMenu(timerProvider),
-              const Padding(
-                padding: EdgeInsets.only(
-                    left: 16.0, top: 16.0), // Section Spacing
-                child: Text('Invited Thakkalis',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              ...buildInvitedTimersMenu(timerProvider),
-              const SizedBox(height: 10),
-              ListTile(
-                title: const Text('Statistics'),
-                onTap: () {
-                  // ... Navigate to settings
-                  checkAndCloseDrawer();
-                },
-              ),
-              ListTile(
-                title: const Text('Settings'),
-                onTap: () {
-                  // ... Navigate to settings
-                  checkAndCloseDrawer();
-                },
-              ),
-              buildLogout(context),
-            ],
-          ),
-        ));
+            ));
   }
 
-  checkAndCloseDrawer(){
-    if(MediaQuery.of(context).size.width < 600){
+  checkAndCloseDrawer() {
+    if (MediaQuery.of(context).size.width < 600) {
       Navigator.pop(context);
     }
   }
 
   Widget buildLogout(BuildContext context) {
-    if(FirebaseAuth.instance.currentUser == null){
+    if (FirebaseAuth.instance.currentUser == null) {
       return const SizedBox.shrink();
     }
     return ListTile(
       title: const Text('Logout'),
-      onTap: ()  {
+      onTap: () {
         FirebaseAuth.instance.signOut();
         Provider.of<TimerProvider>(context, listen: false).clearAll();
         checkAndCloseDrawer();
@@ -117,7 +115,7 @@ class _SideMenuState extends State<SideMenu>{
         timerModel.timers.isNotEmpty) {
       final List<ListTile> tiles = [];
       for (int index = 0; index < timerModel.timers.length; index++) {
-        tiles.add(buildMenuTile(timerModel.timers[index], timerProvider));
+        tiles.add(buildMenuTile(timerModel.timers[index], timerProvider, true));
       }
       return tiles;
     } else {
@@ -132,7 +130,8 @@ class _SideMenuState extends State<SideMenu>{
         timerModel.invitedTimers.isNotEmpty) {
       final List<ListTile> tiles = [];
       for (int index = 0; index < timerModel.invitedTimers.length; index++) {
-        tiles.add(buildMenuTile(timerModel.invitedTimers[index], timerProvider));
+        tiles.add(buildMenuTile(
+            timerModel.invitedTimers[index], timerProvider, false));
       }
       return tiles;
     } else {
@@ -140,23 +139,20 @@ class _SideMenuState extends State<SideMenu>{
     }
   }
 
-  buildMenuTile(DocumentSnapshot value, final TimerProvider timerProvider,){
-    final timerData =
-    value.data() as Map<String, dynamic>;
-    return  ListTile(
+  buildMenuTile(DocumentSnapshot value, final TimerProvider timerProvider,
+      final bool isOwnTimer) {
+    final timerData = value.data() as Map<String, dynamic>;
+    return ListTile(
       title: Text(timerData['name'] ?? 'Untitled Timer'),
       onTap: () {
         //TODO show some loading, as we fetch all sessions again here, should figure out a way to cache this
         timerProvider.setTimerReference(
-            value.reference,
-            timerData['name'],
-            timerData['owner']);
+            value.reference, timerData['name'], timerData['owner'], isOwnTimer);
         //Check if its desktop browser with larger width, if not pop the drawer
         if (MediaQuery.of(context).size.width < 600) {
           Navigator.pop(context);
         }
       },
     );
-
   }
 }

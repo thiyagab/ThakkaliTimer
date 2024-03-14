@@ -1,11 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thakkalitimer/DBHelper.dart';
 import 'package:thakkalitimer/model/TimerModel.dart';
 
 class TimerProvider extends ChangeNotifier {
   final TimerModel _timerModel = TimerModel();
+
   TimerModel get timerModel => _timerModel;
 
   fetchAllSessions({bool notify = true}) async {
@@ -53,18 +54,18 @@ class TimerProvider extends ChangeNotifier {
     if (invitedTimers != null) {
       _timerModel.invitedTimers.clear();
       _timerModel.invitedTimers.addAll(invitedTimers);
-      if (notify) notifyListeners();
     }
+    if (notify) notifyListeners();
   }
 
   void initializeTimer(DocumentSnapshot value) {
     _timerModel.timerReference = value.reference;
-    _timerModel.isOwnTimer = true;
     if (value.data() != null) {
       setTimerReference(
           value.reference,
           (value.data() as Map<String, dynamic>)['name'],
-          (value.data() as Map<String, dynamic>)['owner']);
+          (value.data() as Map<String, dynamic>)['owner'],
+          true);
     }
   }
 
@@ -117,11 +118,12 @@ class TimerProvider extends ChangeNotifier {
   }
 
   void setTimerReference(DocumentReference? newTimerReference,
-      String? timerName, String? ownerName) async {
+      String? timerName, String? ownerName, bool isOwnTimer) async {
     _timerModel.timerReference = newTimerReference;
     _timerModel.timerName = timerName;
     _timerModel.ownerName = ownerName;
     _timerModel.selectedScreen = 1;
+    _timerModel.isOwnTimer = isOwnTimer;
     await fetchAllSessions(notify: false);
     notifyListeners(); // Notify consumers of state change
   }
@@ -132,6 +134,7 @@ class TimerProvider extends ChangeNotifier {
     _timerModel.ownerName = null;
     _timerModel.totalCompletedSessions = 0;
     _timerModel.selectedScreen = 1;
+    _timerModel.isOwnTimer = true;
     if (notify) {
       notifyListeners();
     }
@@ -141,20 +144,21 @@ class TimerProvider extends ChangeNotifier {
     if (_timerModel.timerReference != null) {
       await DBHelper.deleteAllSessionsForTimerForCurrentUser(
           timerReference: timerModel.timerReference);
-      clearTimerReference(notify: false);
+      DocumentReference timerReference = _timerModel.timerReference!;
+
       if (_timerModel.isOwnTimer) {
-        QuerySnapshot value = await DBHelper.fetchAllSessionsForTimer(
-            _timerModel.timerReference!);
+        QuerySnapshot value =
+            await DBHelper.fetchAllSessionsForTimer(timerReference);
         if (value == null || value.docs.isEmpty) {
-          await DBHelper.deleteTimer(reference: _timerModel.timerReference!);
+          await DBHelper.deleteTimer(reference: timerReference);
         } else {
-          await DBHelper.deactivateTimer(
-              reference: _timerModel.timerReference!);
+          await DBHelper.deactivateTimer(reference: timerReference);
         }
-        fetchTimers();
+        fetchTimers(notify: false);
       } else {
-        fetchInvitedTimers();
+        await fetchInvitedTimers(notify: false);
       }
+      clearTimerReference();
     }
   }
 
@@ -187,7 +191,7 @@ class TimerProvider extends ChangeNotifier {
     _timerModel.sessions.clear();
     _timerModel.remainingTime = _timerModel.totalTime;
     _timerModel.isTimerRunning = false;
-    _timerModel.isOwnTimer=true;
+    _timerModel.isOwnTimer = true;
     clearTimerReference();
   }
 }
