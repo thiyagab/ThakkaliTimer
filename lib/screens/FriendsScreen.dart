@@ -29,7 +29,7 @@ class _FriendsScreenState extends State<FriendsScreen>{
       return const Center(child: Text('No friends found'));
     }
     return StreamBuilder(
-      stream: DBHelper.streamAllSessionsForTimer(timerProvider.timerModel!.timerReference!),
+      stream: DBHelper.streamAllSessionsForTimer(timerProvider.timerModel.timerReference!),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if((snapshot.data!.docs).isEmpty){

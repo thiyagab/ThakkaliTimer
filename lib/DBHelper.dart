@@ -22,6 +22,7 @@ class DBHelper {
       print('Error creating timer: $error');
       rethrow;
     }
+    return null;
   }
 
   // Delete given timerreference
@@ -48,6 +49,7 @@ class DBHelper {
         });
       });
     }
+    return null;
   }
 
   // Create a feed with userid, timer reference, time stamp and user display name and add to feedcollection
@@ -63,6 +65,7 @@ class DBHelper {
         'message': message
       });
     }
+    return null;
   }
 
   static Future<void> deleteFeed({required DocumentReference reference}) async {
@@ -97,12 +100,13 @@ class DBHelper {
           .where('isActive', isEqualTo: true)
           .get();
     }
+    return null;
   }
 
   static Future<List<DocumentSnapshot>?> fetchAllTimersFromSessions() async {
     QuerySnapshot value = await fetchAllSessionsForCurrentUser();
     List<DocumentSnapshot> timers = [];
-    if (value.docs != null && value.docs.isNotEmpty) {
+    if (value.docs.isNotEmpty) {
       value.docs.map((e) => timers.add(e));
       Set<String> documentIds = value.docs
           .map((session) =>
@@ -120,6 +124,7 @@ class DBHelper {
       print('value1 length ${value1.docs.length}'+' timers length ${timers.length}');
       return timers;
     }
+    return null;
   }
 
   static Future<DocumentSnapshot<Object?>>? fetchTimer(String timerId) {
@@ -130,6 +135,7 @@ class DBHelper {
     } catch (error) {
       print(error);
     }
+    return null;
   }
 
   static Future<QuerySnapshot<Object?>> fetchAllSessionsForCurrentUser() {
@@ -203,6 +209,7 @@ class DBHelper {
         });
       }
     }
+    return null;
   }
 
   static Future<void> updateSession({

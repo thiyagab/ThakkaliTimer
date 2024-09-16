@@ -2,14 +2,12 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thakkalitimer/DBHelper.dart';
 import 'package:thakkalitimer/model/TimerModel.dart';
 import 'package:thakkalitimer/model/TimerProvider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter/services.dart';
 
 class TimerScreen extends StatefulWidget {
   @override
@@ -24,7 +22,7 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     final timerProvider = Provider.of<TimerProvider>(context);
-    timerModel = timerProvider?.timerModel;
+    timerModel = timerProvider.timerModel;
     return buildTimerSection();
   }
 
@@ -56,7 +54,7 @@ class _TimerScreenState extends State<TimerScreen> {
       showMessage('Please enter a task label');
       return;
     }
-    timerModel?.timerName = textController.text.toString().trim();
+    timerModel.timerName = textController.text.toString().trim();
 
     if (timerModel.timerReference != null &&
         FirebaseAuth.instance.currentUser == null) {
@@ -67,7 +65,7 @@ class _TimerScreenState extends State<TimerScreen> {
     }
     loading();
     timerModel.timerReference ??=
-        await DBHelper.createTimer(name: timerModel!.timerName!);
+        await DBHelper.createTimer(name: timerModel.timerName!);
     if (timerModel.timerReference != null) {
       timerModel.sessionReference = await DBHelper.createSession(
           timerReference: timerModel.timerReference);

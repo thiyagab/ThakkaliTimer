@@ -1,9 +1,7 @@
-import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:thakkalitimer/screens/FeedUI.dart';
 import 'package:thakkalitimer/screens/FriendsScreen.dart';
@@ -73,23 +71,25 @@ class _HomeScreenState extends State<HomeScreen>
   Widget buildPersistentNavigation() {
     return PersistentTabView(
       context,
-      screenTransitionAnimation: const ScreenTransitionAnimation(
+      animationSettings: const NavBarAnimationSettings(
+          navBarItemAnimation: ItemAnimationSettings(
+            // Navigation Bar's items animation properties.
+            duration: Duration(milliseconds: 400),
+            curve: Curves.ease,
+          ),
+      screenTransitionAnimation: ScreenTransitionAnimationSettings(
         // Screen transition animation on change of selected tab.
         animateTabTransition: true,
-        curve: Curves.easeInOut,
-        duration: Duration(milliseconds: 400),
-      ),
+        duration: Duration(milliseconds: 300),
+        screenTransitionAnimationType:
+        ScreenTransitionAnimationType.fadeIn,
+      )),
       controller: _tabController,
       screens: [
         FriendsScreen(),
         TimerScreen(), // Create if not defined.
         FeedUI(),
       ],
-      itemAnimationProperties: const ItemAnimationProperties(
-        // Navigation Bar's items animation properties.
-        duration: Duration(milliseconds: 400),
-        curve: Curves.ease,
-      ),
       items: _buildNavBarItems(),
       onItemSelected: (index) => _onItemTapped(index),
       navBarStyle: NavBarStyle.style6, // Choose a style you like

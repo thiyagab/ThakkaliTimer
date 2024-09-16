@@ -100,7 +100,7 @@ class _SideMenuState extends State<SideMenu> {
         Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Text(
-            'Welcome ${FirebaseAuth.instance is FirebaseAuth && FirebaseAuth.instance.currentUser != null ? FirebaseAuth.instance.currentUser!.displayName : 'User'},',
+            'Welcome ${FirebaseAuth.instance.currentUser != null ? FirebaseAuth.instance.currentUser!.displayName : 'User'},',
             style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
         )
@@ -110,9 +110,7 @@ class _SideMenuState extends State<SideMenu> {
 
   List<ListTile> buildTimersMenu(final TimerProvider timerProvider) {
     final timerModel = timerProvider.timerModel;
-    if (timerModel != null &&
-        timerModel.timers != null &&
-        timerModel.timers.isNotEmpty) {
+    if (timerModel.timers.isNotEmpty) {
       final List<ListTile> tiles = [];
       for (int index = 0; index < timerModel.timers.length; index++) {
         tiles.add(buildMenuTile(timerModel.timers[index], timerProvider, true));
@@ -125,9 +123,7 @@ class _SideMenuState extends State<SideMenu> {
 
   List<ListTile> buildInvitedTimersMenu(final TimerProvider timerProvider) {
     final timerModel = timerProvider.timerModel;
-    if (timerModel != null &&
-        timerModel.invitedTimers != null &&
-        timerModel.invitedTimers.isNotEmpty) {
+    if (timerModel.invitedTimers.isNotEmpty) {
       final List<ListTile> tiles = [];
       for (int index = 0; index < timerModel.invitedTimers.length; index++) {
         tiles.add(buildMenuTile(

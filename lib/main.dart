@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
           print('timer id $timerId');
           return buildHomeScreen(timerId);
         }
+        return null;
       },
       initialRoute: '/',
       // routes: {
